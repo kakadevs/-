@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adoro S/A - Gerenciamento de Projetos</title>
+    <link rel="icon" type="image/png" href="/static/img/images.png">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/buger.css">
+    <link rel="stylesheet" href="/static/css/ambiente.css">
+    <link rel="stylesheet" href="/static/css/modal.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="/static/img/images.png" alt="Logo Adoro S/A" class="logo-img">
+            <h1>Adoro S/A</h1>
+        </div>
+
+        <div class="side-menu">
+            <img src="/static/img/images.png" alt="Logo Adoro S/A" class="logo-img">
+            <ul>
+                <li><a href="home.html">Início</a></li>
+                <li><a href="https://www.adoro.com.br/a-adoro/">Sobre Nós</a></li>
+                <li><a href="https://www.adoro.com.br/receitas/">Receitas Ad'oro</a></li>
+                <li><a href="https://www.adoro.com.br/sac/">Contato</a></li>
+            </ul>
+        </div>
+
+        <nav>
+            <div class="burger-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+
+
+
+
+        
+    </header>
+
+    <div class="ccontainer">
+        <h1 class="titulo-container"></h1>
+        <div class="add-project">
+            <button class="add-project-btn" onclick="addNewProject()">+ Novo Projeto</button>
+        </div>
+
+        <div class="dashboard" id="dashboard"></div>
+    </div>
+
+    <div id="modal" class="modal">
+
+        <div class="modal-content">
+            <img src="/static/img/images.png" alt="Logo Adoro S/A" class="frango">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <iframe id="modal-iframe" src="" frameborder="0"></iframe>
+
+            <div class="container">
+                <div class="header"></div>
+                <div class="section">
+                    <strong>Descrição</strong>
+                    <div class="description-box">
+                        <textarea rows="3" placeholder="Digite a descrição..."></textarea>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="buttons">
+                        <strong>Comentários</strong>
+                    </div>
+                </div>
+
+                <div class="comment-box">
+                    <textarea rows="3" placeholder="Adicionar comentário..."></textarea>
+                </div>
+
+                <div class="section">
+                    <strong>Informações</strong>
+                    <div class="card">
+                        <div class="info"><span>Responsável:</span> <span>Luís Eduardo Nunes</span></div>
+                        <div class="info"><span>Relator:</span> <span>Luís Eduardo Nunes</span></div>
+                        <div class="info">
+                            <span>Prioridade:</span>
+                            <div class="priority">
+                                <div class="priority-dropdown">
+                                    <select id="priority-select">
+                                        <option value="2">Muito Alta</option>
+                                        <option value="1">Alta</option>
+                                        <option value="3">Média</option>
+                                        <option value="4">Baixa</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info">
+                            <span>Data limite:</span>
+                            <input type="date" id="deadline" value="2025-02-24">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       
+        document.addEventListener("contextmenu", (e) => e.preventDefault());
+document.addEventListener("keydown", (e) => {
+    if (
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && e.key === "I") ||
+        (e.ctrlKey && e.key === "U")
+    ) {
+        e.preventDefault();
+        return false;
+    }
+});
+const detectDevTools = () => {
+    const threshold = 160;
+    setInterval(() => {
+        if (
+            window.outerWidth - window.innerWidth > threshold ||
+            window.outerHeight - window.innerHeight > threshold
+        ) {
+            while (true) { }
+        }
+    }, 500);
+};
+detectDevTools();
+
+
+    </script>
+
+    <footer>
+        <p>© Ad'oro 2025 - Todos os direitos reservados.</p>
+    </footer>
+
+    <script>
+        const burgerMenu = document.querySelector('.burger-menu');
+                const sideMenu = document.querySelector('.side-menu');
+                burgerMenu.addEventListener('click', () => {
+                    sideMenu.classList.toggle('active');
+                    burgerMenu.classList.toggle('active');
+                });
+        </script>
+
+    <script src="/static/js/Projetos.js"></script>
+    <script src="/static/js/Jira.js"></script>
+    <script src="/static/js/File.js"></script>
+    <script src="/static/js/Modal.js"></script>
+    <script src="/static/js/Devtools.js"></script>
+
+</body>
+
+</html>

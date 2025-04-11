@@ -1,0 +1,168 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #121212; /* Fundo escuro */
+    color: #e0e0e0; /* Texto claro */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+    overflow-y: auto; /* Permite rolagem no corpo da página */
+}
+
+.container {
+    width: 90%;
+    max-width: 900px;
+    background: #1f1f1f; /* Fundo do container mais escuro */
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow-y: auto; /* Adiciona rolagem ao container se necessário */
+}
+
+.header {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px 0;
+    color: #4caf50; /* Cor de texto mais vibrante */
+}
+
+.section {
+    margin-top: 20px;
+}
+
+.section strong {
+    display: block;
+    text-align: left;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #e0e0e0; /* Cor de texto clara */
+    margin-bottom: 5px;
+}
+
+.description-box textarea,
+.comment-box textarea {
+    width: 100%;
+    background: #333333; /* Fundo escuro nos campos de texto */
+    color: #e0e0e0; /* Texto claro */
+    border: 1px solid #555555; /* Borda mais suave */
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 1em;
+    margin-top: 10px;
+    resize: vertical; /* Permite expansão vertical sem quebrar o layout */
+    max-height: 300px; /* Define um limite máximo para o tamanho */
+    overflow-y: auto; /* Habilita a rolagem dentro do campo de texto */
+}
+
+.attachment-box {
+    margin-top: 10px;
+}
+
+.attachment-box input {
+    background: #333333; /* Fundo escuro nos campos de entrada */
+    border: 1px solid #555555; /* Borda mais suave */
+    padding: 10px;
+    width: 100%;
+    color: #e0e0e0; /* Texto claro */
+}
+
+.file-list {
+    margin-top: 10px;
+    padding: 0;
+}
+
+
+
+
+.card {
+    background: #333333; /* Fundo escuro para os cards */
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #555555; /* Borda mais suave */
+}
+
+.info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+}
+
+.priority-dropdown select {
+    background: #333333; /* Fundo escuro no seletor */
+    border: 1px solid #555555; /* Borda mais suave */
+    color: #e0e0e0; /* Texto claro */
+    padding: 5px;
+    border-radius: 5px;
+}
+
+#deadline {
+    border-radius: 7px;
+    background: #333333; /* Fundo escuro no seletor de data */
+    border: 1px solid #555555; /* Borda mais suave */
+    color: #e0e0e0; /* Texto claro */
+    padding: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    width: 200px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+        width: 95%;
+        max-width: none; /* Remove o limite máximo para telas menores */
+    }
+
+    .header {
+        font-size: 1.2em; /* Diminui o tamanho da fonte em telas menores */
+    }
+    
+    .description-box textarea,
+    .comment-box textarea {
+        font-size: 0.9em; /* Diminui o tamanho da fonte nos campos de texto */
+        padding: 8px;
+    }
+
+    .attachment-box input {
+        padding: 8px; /* Diminui o padding para entradas menores */
+    }
+
+    .file-list li {
+        flex-direction: column; /* Empilha os itens na vertical em telas pequenas */
+    }
+
+    .card {
+        padding: 10px;
+    }
+
+    /* Diminuir o tamanho de elementos de formulário em telas pequenas */
+    .priority-dropdown select,
+    #deadline {
+        width: 100%; /* Torna o seletor e data selector 100% da largura em telas pequenas */
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        font-size: 1.1em; /* Diminui ainda mais o tamanho da fonte */
+    }
+
+    .container {
+        padding: 15px;
+    }
+
+    .file-list li {
+        padding: 8px;
+    }
+}

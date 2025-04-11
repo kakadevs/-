@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Adoro S/A</title>
+    <link rel="stylesheet" href="css/log.css">
+    <link rel="icon" type="image/png" href="images.png">
+
+
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+    <script src="js/fireebase.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const auth = firebase.auth();
+
+            const loginForm = document.getElementById("loginForm");
+            const errorMsg = document.getElementById("errorMsg");
+
+            loginForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+
+                const email = document.getElementById("email").value;
+                const password = document.getElementById("password").value;
+
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        localStorage.setItem("user", JSON.stringify(userCredential.user));
+                        window.location.href = "home.html";
+                    })
+                    .catch((error) => {
+                        errorMsg.textContent = "Erro: " + error.message;
+                    });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div class="logo-container">
+        <img src="images.png" alt="Logo Adoro S/A" class="logo">
+    </div>
+
+    <div class="login-container">
+        <h1>Login</h1>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Senha" required>
+            <p class="error" id="errorMsg"></p>
+            <button type="submit">Entrar</button>
+        </form>
+    </div>
+
+    <div class="loading-screen" id="loadingScreen">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        document.addEventListener("contextmenu", (e) => e.preventDefault());
+        document.addEventListener("keydown", (e) => {
+            if (
+                e.key === "F12" ||
+                (e.ctrlKey && e.shiftKey && e.key === "I") ||
+                (e.ctrlKey && e.key === "U")
+            ) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        const detectDevTools = () => {
+            const threshold = 160;
+            setInterval(() => {
+                if (
+                    window.outerWidth - window.innerWidth > threshold ||
+                    window.outerHeight - window.innerHeight > threshold
+                ) {
+                    while (true) { }
+                }
+            }, 500);
+        };
+        detectDevTools();
+    </script>
+
+    <script>
+        const burgerMenu = document.querySelector('.burger-menu');
+        const sideMenu = document.querySelector('.side-menu');
+        burgerMenu.addEventListener('click', () => {
+            sideMenu.classList.toggle('active');
+            burgerMenu.classList.toggle('active');
+        });
+    </script>
+
+    <script src="js/Devtools.js"></script>
+</body>
+
+</html>

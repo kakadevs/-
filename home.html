@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adoro S/A - Gerenciamento de Projetos</title>
+    <link rel="icon" type="image/png" href="images.png">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/buger.css">
+
+
+    <style>
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid #ffc800;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const auth = firebase.auth();
+
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = "index.html";
+            }
+        });
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                auth.signOut().then(() => {
+                    window.location.href = "index.html";
+                });
+            });
+        }
+    });
+</script>
+
+
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="images.png" alt="Logo Adoro S/A" class="logo-img">
+            <h1>Adoro S/A</h1>
+        </div>
+
+        <div class="side-menu">>
+            <img src="images.png" alt="Logo Adoro S/A" class="logo-img">
+            <ul>
+                <li><a href="home.html">Início</a></li>
+                <li><a href="https://www.adoro.com.br/a-adoro/">Sobre Nós</a></li>
+                <li><a href="https://www.adoro.com.br/receitas/">Receitas Ad'oro</a></li>
+                <li><a href="https://www.adoro.com.br/sac/">Contato</a></li>
+            </ul>
+        </div>
+
+        <nav>
+            <div class="burger-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <section id="home">
+        <div class="intro">
+
+        </div>
+    </section>
+
+
+
+    <section class="projects">
+        <div class="project-management">
+            <h2>Luís Rocha - Licenciamentos</h2>
+            <img src="mala.jpg" alt="imagem">
+            <p>Administrar Projeto de uma maneira segura e eficiente.</p>
+            <button onclick="startLoading('ambiente.html')">Administrar Projeto</button>
+
+        </div>
+    </section>
+
+
+
+
+
+    <section class="projects">
+        <div class="project-management">
+            <h2>VP Rotina Meio Ambiente </h2>
+            <img src="meio.jpg" alt="imagem">
+            <p>Administrar Projeto de uma maneira segura e eficiente.</p>
+            <button onclick="startLoading('ambiente.html')">Administrar Projeto</button>
+
+        </div>
+    </section>
+
+    <section class="projects">
+        <div class="project-management">
+            <h2>Acesso Frigorífico Vista</h2>
+            <img src="vista.jpg" alt="imagem">
+            <p>Administrar Projeto de uma maneira segura e eficiente.</p>
+            <button onclick="startLoading('ponto.html')">Administrar Projeto</button>
+        </div>
+    </section>
+
+    <section class="projects">
+        <div class="project-management">
+            <h2>Licenciamento Ponto De Abastecimento</h2>
+            <img src="ponto.jpg" alt="imagem">
+            <p>Administrar Projeto de uma maneira segura e eficiente.</p>
+            <button onclick="startLoading('ponto.html')">Administrar Projeto</button>
+
+        </div>
+    </section>
+
+
+
+    <section class="projects">
+        <div class="project-management">
+            <h2>VISTA Reclamação (Odor)</h2>
+            <img src="odor.jpg" alt="imagem">
+            <p>Administrar Projeto de uma maneira segura e eficiente.</p>
+            <button onclick="startLoading('.html')">Administrar Projeto</button>
+
+        </div>
+    </section>
+
+
+    <section class="projects">
+        <div class="project-management">
+            <h2>VISTA - Reclamação (Ruído)</h2>
+            <img src="ruido.jpg" alt="imagem">
+            <p>Administrar Projeto de uma maneira segura e eficiente.</p>
+            <button onclick="startLoading('.html')">Administrar Projeto</button>
+
+        </div>
+    </section>
+
+
+    <section class="projects">
+        <div class="project-management">
+            <h2>Estudo de adequação de águas pluviais</h2>
+            <img src=agua.jpg" alt="imagem">
+            <p>Administrar Projeto de uma maneira segura e eficiente.</p>
+            <button onclick="startLoading('.html')">Administrar Projeto</button>
+
+
+
+        </div>
+    </section>
+
+
+    <section class="projects">
+        <div class="project-management">
+            <h2>VP Implantação de coleta seletiva</h2>
+            <img src="reciclagem.jpg" alt="imagem">
+            <p>Administrar Projeto de uma maneira segura e eficiente.</p>
+            <button onclick="startLoading('.html')">Administrar Projeto</button>
+
+        </div>
+    </section>
+
+
+
+
+    <div class="loading-screen" id="loadingScreen">
+        <div class="spinner"></div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Adoro S/A. Todos os direitos reservados.</p>
+    </footer>
+
+
+
+
+    <script>
+        function startLoading(url) {
+
+            const loadingScreen = document.getElementById("loadingScreen");
+            loadingScreen.style.display = "flex";
+
+
+            setTimeout(function () {
+                window.location.href = url;
+            }, 2000);
+        }
+
+        document.addEventListener("contextmenu", (e) => e.preventDefault());
+        document.addEventListener("keydown", (e) => {
+            if (
+                e.key === "F12" ||
+                (e.ctrlKey && e.shiftKey && e.key === "I") ||
+                (e.ctrlKey && e.key === "U")
+            ) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        const detectDevTools = () => {
+            const threshold = 160;
+            setInterval(() => {
+                if (
+                    window.outerWidth - window.innerWidth > threshold ||
+                    window.outerHeight - window.innerHeight > threshold
+                ) {
+                    while (true) { }
+                }
+            }, 500);
+        };
+        detectDevTools();
+</script>
+
+<script>
+    const burgerMenu = document.querySelector('.burger-menu');
+            const sideMenu = document.querySelector('.side-menu');
+            burgerMenu.addEventListener('click', () => {
+                sideMenu.classList.toggle('active');
+                burgerMenu.classList.toggle('active');
+            });
+    </script>
+
+    <script src="js/Devtools.js"></script>
+
+</body>
+
+</html>
