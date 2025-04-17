@@ -1,3 +1,5 @@
+// script.js
+
 document.addEventListener("DOMContentLoaded", () => {
     loadProjects();
     setupDragAndDrop();
@@ -6,105 +8,102 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function setupFileUpload() {
-    document.addEventListener("change", function (event) {
-        if (event.target.classList.contains("file-upload")) {
-            const column = event.target.closest(".column");
-            const fileListContainer = column.querySelector(".file-list");
-            const files = Array.from(event.target.files);
-            const id = column.getAttribute("data-id");
+    document.addEventListener("change", event => {
+        if (!event.target.classList.contains("file-upload")) return;
 
-            // Impede ultrapassar 10 arquivos
-            if (fileListContainer.children.length + files.length > 10) {
-                alert("Limite de 10 arquivos por projeto atingido.");
-                return;
-            }
+        const column = event.target.closest(".column");
+        if (!column) return;
 
-            let pending = files.length;
-
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const result = e.target.result;
-                    if (!result.startsWith("data:")) {
-                        console.warn("Arquivo inválido ignorado:", file.name);
-                        pending--;
-                        return;
-                    }
-
-                    const fileData = {
-                        name: file.name,
-                        base64: result
-                    };
-
-                    addFileWithPreview(fileData, fileListContainer);
-                    updateProjectFiles(id, fileListContainer);
-
-                    pending--;
-                    if (pending === 0) saveProjects();
-                };
-                reader.readAsDataURL(file);
-            });
+        const fileListContainer = column.querySelector(".file-list");
+        if (!fileListContainer) {
+            console.warn("⚠️ .file-list não encontrado para este projeto");
+            return;
         }
+
+        const files = Array.from(event.target.files);
+        const projectId = column.getAttribute("data-id");
+        if (!projectId) {
+            console.warn("⚠️ data-id do projeto não encontrado");
+            return;
+        }
+
+        // Limita até 10 arquivos
+        if (fileListContainer.children.length + files.length > 10) {
+            alert("Limite de 10 arquivos por projeto atingido.");
+            return;
+        }
+
+        let pending = files.length;
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const base64 = e.target.result;
+                if (typeof base64 !== "string" || !base64.startsWith("data:")) {
+                    console.warn("Arquivo inválido, ignorado:", file.name);
+                    if (--pending === 0) saveProjects();
+                    return;
+                }
+
+                const fileData = { name: file.name, base64 };
+                addFileWithPreview(fileData, fileListContainer);
+                updateProjectFiles(projectId, fileListContainer);
+
+                if (--pending === 0) saveProjects();
+            };
+            reader.onerror = () => {
+                console.error("Erro ao ler arquivo:", file.name);
+                if (--pending === 0) saveProjects();
+            };
+            reader.readAsDataURL(file);
+        });
     });
 }
 
-function addFileWithPreview(fileData, container) {
-    const { name, base64 } = fileData;
+function addFileWithPreview({ name, base64 }, container) {
+    const item = document.createElement("div");
+    item.className = "file-item";
 
-    const listItem = document.createElement("div");
-    listItem.className = "file-item";
+    const blob = base64ToBlob(base64);
+    const url  = URL.createObjectURL(blob);
 
-    const fileBlob = base64ToBlob(base64);
-    const fileURL = URL.createObjectURL(fileBlob);
+    const spanName = document.createElement("span");
+    spanName.textContent = name;
+    spanName.dataset.base64 = base64;
+    spanName.style.cursor = "pointer";
+    spanName.addEventListener("click", () => window.open(url, "_blank"));
 
-    const fileName = document.createElement("span");
-    fileName.textContent = name;
-    fileName.style.cursor = "pointer";
-    fileName.dataset.base64 = base64;
-    fileName.addEventListener("click", () => window.open(fileURL, '_blank'));
-
-    const removeButton = document.createElement("span");
-    removeButton.textContent = "Remover";
-    removeButton.style.marginLeft = "10px";
-    removeButton.style.cursor = "pointer";
-    removeButton.addEventListener("click", () => {
-        container.removeChild(listItem);
-        const column = container.closest(".column");
-        updateProjectFiles(column.getAttribute("data-id"), container);
+    const btnRemove = document.createElement("span");
+    btnRemove.textContent = "Remover";
+    btnRemove.style.marginLeft = "10px";
+    btnRemove.style.cursor = "pointer";
+    btnRemove.addEventListener("click", () => {
+        container.removeChild(item);
+        const col = container.closest(".column");
+        updateProjectFiles(col.getAttribute("data-id"), container);
         saveProjects();
     });
 
-    listItem.appendChild(fileName);
-    listItem.appendChild(removeButton);
-    container.appendChild(listItem);
+    item.append(spanName, btnRemove);
+    container.appendChild(item);
 }
 
 function base64ToBlob(base64) {
-    const parts = base64.split(',');
-    const byteString = atob(parts[1]);
-    const mimeString = parts[0].split(':')[1].split(';')[0];
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([ab], { type: mimeString });
+    const [meta, data] = base64.split(",");
+    const mime = meta.match(/data:([^;]+);/)[1];
+    const binary = atob(data);
+    const ab = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) ab[i] = binary.charCodeAt(i);
+    return new Blob([ab], { type: mime });
 }
 
 function updateProjectFiles(projectId, container) {
-    const fileItems = container.querySelectorAll(".file-item");
-    const files = Array.from(fileItems).map(item => {
-        const nameSpan = item.querySelector("span[data-base64]");
-        return {
-            name: nameSpan?.textContent || "",
-            base64: nameSpan?.dataset.base64 || ""
-        };
-    });
+    const files = Array.from(container.querySelectorAll(".file-item span[data-base64]"))
+        .map(span => ({ name: span.textContent, base64: span.dataset.base64 }));
 
     const projects = JSON.parse(localStorage.getItem("projects")) || [];
-    const index = projects.findIndex(p => p.id == projectId);
-    if (index !== -1) {
-        projects[index].files = files;
+    const idx = projects.findIndex(p => String(p.id) === String(projectId));
+    if (idx !== -1) {
+        projects[idx].files = files;
         localStorage.setItem("projects", JSON.stringify(projects));
     }
 }
@@ -115,75 +114,54 @@ function openModal(projectId) {
     modal.setAttribute("data-project-id", projectId);
     loadModalContent(projectId);
 
-    const projectTitle = document.querySelector(`.column[data-id="${projectId}"] .project-title`);
+    const title = document.querySelector(`.column[data-id="${projectId}"] .project-title`);
     const modalTitle = document.getElementById("modal-title");
-    if (modalTitle && projectTitle) {
-        modalTitle.textContent = `Detalhes: ${projectTitle.textContent}`;
+    if (title && modalTitle) {
+        modalTitle.textContent = `Detalhes: ${title.textContent}`;
     }
 }
 
 function closeModal() {
     const modal = document.getElementById("modal");
-    if (!modal) return;
-
-    const projectId = modal.getAttribute("data-project-id");
-    if (projectId) {
-        saveModalData(projectId);
-    }
-
+    const pid = modal.getAttribute("data-project-id");
+    if (pid) saveModalData(pid);
     modal.style.display = "none";
     modal.removeAttribute("data-project-id");
 }
 
 function saveModalData(projectId) {
-    const modal = document.getElementById("modal");
-    if (!modal) return;
-
     const data = {
         description: document.querySelector(".description-box textarea")?.value || "",
-        comment: document.querySelector(".comment-box textarea")?.value || "",
-        priority: document.getElementById("priority-select")?.value || "1",
-        deadline: document.getElementById("deadline")?.value || "",
+        comment:     document.querySelector(".comment-box textarea")?.value     || "",
+        priority:    document.getElementById("priority-select")?.value         || "1",
+        deadline:    document.getElementById("deadline")?.value                || ""
     };
-
     localStorage.setItem(`modalData_${projectId}`, JSON.stringify(data));
 }
 
 function loadModalContent(projectId) {
-    const savedData = JSON.parse(localStorage.getItem(`modalData_${projectId}`)) || {};
-
-    setValue(".description-box textarea", savedData.description);
-    setValue(".comment-box textarea", savedData.comment);
-    setValue("#priority-select", savedData.priority);
-    setValue("#deadline", savedData.deadline);
-}
-
-function setValue(selector, value) {
-    const element = document.querySelector(selector);
-    if (element) element.value = value || "";
+    const saved = JSON.parse(localStorage.getItem(`modalData_${projectId}`)) || {};
+    document.querySelector(".description-box textarea").value = saved.description || "";
+    document.querySelector(".comment-box textarea").value     = saved.comment     || "";
+    document.getElementById("priority-select").value         = saved.priority    || "1";
+    document.getElementById("deadline").value                = saved.deadline    || "";
 }
 
 function setupModalSystem() {
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('add-task')) {
-            const project = e.target.closest('.column');
-            if (project?.hasAttribute('data-id')) {
-                openModal(project.getAttribute('data-id'));
-            }
+    document.addEventListener("click", e => {
+        if (e.target.classList.contains("add-task")) {
+            const col = e.target.closest(".column");
+            if (col) openModal(col.getAttribute("data-id"));
         }
     });
 
-    const closeBtn = document.querySelector(".modal-close");
-    if (closeBtn) {
-        closeBtn.addEventListener("click", closeModal);
-    }
+    document.querySelectorAll(".modal-close").forEach(btn =>
+        btn.addEventListener("click", closeModal)
+    );
 
-    const modal = document.getElementById("modal");
-    if (modal) {
-        modal.addEventListener("click", (e) => {
-            if (e.target === modal) closeModal();
-        });
-    }
+    document.getElementById("modal")?.addEventListener("click", e => {
+        if (e.target.id === "modal") closeModal();
+    });
 }
 
 function cleanProjectModalData(projectId) {
@@ -191,8 +169,8 @@ function cleanProjectModalData(projectId) {
 }
 
 function getNextProjectId() {
-    const columns = document.querySelectorAll(".column");
-    const ids = Array.from(columns).map(col => parseInt(col.getAttribute("data-id")));
+    const cols = [...document.querySelectorAll(".column")];
+    const ids = cols.map(c => parseInt(c.getAttribute("data-id"), 10)).filter(n => !isNaN(n));
     return ids.length ? Math.max(...ids) + 1 : 1;
 }
 
@@ -203,103 +181,95 @@ function addNewProject() {
 }
 
 function addProjectToDOM(id, name, task) {
-    const newProjectContainer = document.createElement("div");
-    newProjectContainer.classList.add("column");
-    newProjectContainer.setAttribute("data-id", id);
-    newProjectContainer.setAttribute("draggable", "true");
+    const col = document.createElement("div");
+    col.className = "column";
+    col.setAttribute("data-id", id);
+    col.setAttribute("draggable", "true");
 
-    newProjectContainer.innerHTML = `
+    col.innerHTML = `
         <div class="task-number">${id}</div>
         <div class="project-title">Projeto ${id}</div>
-        <input type="text" class="project-name" placeholder="Nome do projeto..." value="${name}">
+        <input type="text" class="project-name" placeholder="Nome do projeto..." />
         <div class="task-input">
-            <textarea placeholder="Escreva sua tarefa..." rows="5">${task}</textarea>
+            <textarea placeholder="Escreva sua tarefa..." rows="5"></textarea>
         </div>
         <div class="file-list tasks"></div>
         <label class="attachments-btn">+ Anexos
             <input type="file" class="file-upload" style="display:none" multiple />
         </label>
         <button class="add-task">Mais informações...</button>
-        <button class="delete-project" onclick="deleteProject(${id})">Excluir</button>
+        <button class="delete-project">Excluir</button>
     `;
 
-    document.getElementById("dashboard").appendChild(newProjectContainer);
-    newProjectContainer.querySelector(".project-name").addEventListener("input", saveProjects);
-    newProjectContainer.querySelector(".task-input textarea").addEventListener("input", saveProjects);
+    // set values via properties (evita injeção de HTML)
+    col.querySelector(".project-name").value = name;
+    col.querySelector("textarea").value     = task;
+
+    // listeners
+    col.querySelector(".project-name")
+       .addEventListener("input", saveProjects);
+    col.querySelector("textarea")
+       .addEventListener("input", saveProjects);
+    col.querySelector(".delete-project")
+       .addEventListener("click", () => {
+           cleanProjectModalData(id);
+           col.remove();
+           saveProjects();
+       });
+
+    document.getElementById("dashboard").appendChild(col);
     setupDragAndDrop();
 }
 
-function deleteProject(id) {
-    document.querySelector(`.column[data-id="${id}"]`).remove();
-    cleanProjectModalData(id);
-    saveProjects();
-}
-
 function saveProjects() {
-    const projects = [];
-    document.querySelectorAll(".column").forEach(column => {
-        const id = parseInt(column.getAttribute("data-id"));
-        const name = column.querySelector(".project-name").value;
-        const task = column.querySelector(".task-input textarea").value;
-        const files = Array.from(column.querySelectorAll(".file-item span[data-base64]")).map(span => ({
-            name: span.textContent,
-            base64: span.dataset.base64
-        }));
-        projects.push({ id, name, task, files });
+    const data = [...document.querySelectorAll(".column")].map(col => {
+        const id   = parseInt(col.getAttribute("data-id"), 10);
+        const name = col.querySelector(".project-name").value;
+        const task = col.querySelector("textarea").value;
+        const files = [...col.querySelectorAll(".file-item span[data-base64]")]
+            .map(span => ({ name: span.textContent, base64: span.dataset.base64 }));
+        return { id, name, task, files };
     });
-    localStorage.setItem("projects", JSON.stringify(projects));
+    localStorage.setItem("projects", JSON.stringify(data));
 }
 
 function loadProjects() {
-    const savedProjects = JSON.parse(localStorage.getItem("projects")) || [];
-    savedProjects.forEach(project => {
-        addProjectToDOM(project.id, project.name, project.task);
-        const column = document.querySelector(`.column[data-id="${project.id}"]`);
-        const fileListContainer = column.querySelector(".file-list");
-        if (Array.isArray(project.files)) {
-            project.files.forEach(file => {
-                addFileWithPreview(file, fileListContainer);
-            });
-        }
+    const saved = JSON.parse(localStorage.getItem("projects")) || [];
+    saved.forEach(proj => {
+        addProjectToDOM(proj.id, proj.name, proj.task);
+        const col = document.querySelector(`.column[data-id="${proj.id}"]`);
+        const list = col.querySelector(".file-list");
+        (proj.files || []).forEach(file => addFileWithPreview(file, list));
     });
 }
 
 function setupDragAndDrop() {
-    const columns = document.querySelectorAll(".column");
-    columns.forEach(column => {
-        column.addEventListener("dragstart", (e) => {
-            e.dataTransfer.setData("text/plain", column.dataset.id);
-            column.classList.add("dragging");
+    document.querySelectorAll(".column").forEach(col => {
+        col.addEventListener("dragstart", e => {
+            col.classList.add("dragging");
+            e.dataTransfer.setData("text/plain", col.getAttribute("data-id"));
         });
-
-        column.addEventListener("dragover", (e) => {
+        col.addEventListener("dragover", e => {
             e.preventDefault();
-            const draggingElement = document.querySelector(".dragging");
-            const dashboard = document.getElementById("dashboard");
-            const afterElement = getDragAfterElement(dashboard, e.clientY);
-            if (afterElement == null) {
-                dashboard.appendChild(draggingElement);
-            } else {
-                dashboard.insertBefore(draggingElement, afterElement);
-            }
+            const dragEl = document.querySelector(".dragging");
+            const after = getDragAfterElement(document.getElementById("dashboard"), e.clientY);
+            if (!after) document.getElementById("dashboard").append(dragEl);
+            else document.getElementById("dashboard").insertBefore(dragEl, after);
         });
-
-        column.addEventListener("dragend", () => {
-            column.classList.remove("dragging");
+        col.addEventListener("dragend", () => {
+            col.classList.remove("dragging");
             saveProjects();
         });
     });
 }
 
 function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll(".column:not(.dragging)")];
-    return draggableElements.reduce((closest, child) => {
+    const els = [...container.querySelectorAll(".column:not(.dragging)")];
+    return els.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
         const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closest.offset) {
-            return { offset, element: child };
-        } else {
-            return closest;
-        }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
+        return (offset < 0 && offset > closest.offset)
+            ? { offset, element: child }
+            : closest;
+    }, { offset: -Infinity }).element;
 }
