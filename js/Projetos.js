@@ -13,17 +13,32 @@ function setupFileUpload() {
             const files = Array.from(event.target.files);
             const id = column.getAttribute("data-id");
 
+            // Impede ultrapassar 10 arquivos
+            if (fileListContainer.children.length + files.length > 10) {
+                alert("Limite de 10 arquivos por projeto atingido.");
+                return;
+            }
+
             let pending = files.length;
 
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function (e) {
+                    const result = e.target.result;
+                    if (!result.startsWith("data:")) {
+                        console.warn("Arquivo inválido ignorado:", file.name);
+                        pending--;
+                        return;
+                    }
+
                     const fileData = {
                         name: file.name,
-                        base64: e.target.result
+                        base64: result
                     };
+
                     addFileWithPreview(fileData, fileListContainer);
                     updateProjectFiles(id, fileListContainer);
+
                     pending--;
                     if (pending === 0) saveProjects();
                 };
@@ -50,6 +65,8 @@ function addFileWithPreview(fileData, container) {
 
     const removeButton = document.createElement("span");
     removeButton.textContent = "Remover";
+    removeButton.style.marginLeft = "10px";
+    removeButton.style.cursor = "pointer";
     removeButton.addEventListener("click", () => {
         container.removeChild(listItem);
         const column = container.closest(".column");
@@ -63,8 +80,9 @@ function addFileWithPreview(fileData, container) {
 }
 
 function base64ToBlob(base64) {
-    const byteString = atob(base64.split(',')[1]);
-    const mimeString = base64.split(',')[0].split(':')[1].split(';')[0];
+    const parts = base64.split(',');
+    const byteString = atob(parts[1]);
+    const mimeString = parts[0].split(':')[1].split(';')[0];
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
     for (let i = 0; i < byteString.length; i++) {
@@ -76,10 +94,10 @@ function base64ToBlob(base64) {
 function updateProjectFiles(projectId, container) {
     const fileItems = container.querySelectorAll(".file-item");
     const files = Array.from(fileItems).map(item => {
-        const span = item.querySelector("span");
+        const nameSpan = item.querySelector("span[data-base64]");
         return {
-            name: span.textContent,
-            base64: span.dataset.base64
+            name: nameSpan?.textContent || "",
+            base64: nameSpan?.dataset.base64 || ""
         };
     });
 
@@ -223,7 +241,7 @@ function saveProjects() {
         const id = parseInt(column.getAttribute("data-id"));
         const name = column.querySelector(".project-name").value;
         const task = column.querySelector(".task-input textarea").value;
-        const files = Array.from(column.querySelectorAll(".file-item span:first-child")).map(span => ({
+        const files = Array.from(column.querySelectorAll(".file-item span[data-base64]")).map(span => ({
             name: span.textContent,
             base64: span.dataset.base64
         }));
